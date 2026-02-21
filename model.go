@@ -373,11 +373,11 @@ func isSupportedType(t uint32) bool {
 func matmulDispatch(out []float32, w []byte, wtype uint32, x []float32, rows, cols int) {
 	switch wtype {
 	case ggmlTypeQ4_0:
-		MatMulQ4_0(out, w, x, rows, cols)
+		AccelMatMulQ4_0(out, w, x, rows, cols)
 	case ggmlTypeQ5_0:
 		MatMulQ5_0(out, w, x, rows, cols)
 	case ggmlTypeQ8_0:
-		MatMulQ8_0(out, w, x, rows, cols)
+		AccelMatMulQ8_0(out, w, x, rows, cols)
 	case ggmlTypeF16:
 		MatMulF16(out, w, x, rows, cols)
 	case ggmlTypeF32:
@@ -390,9 +390,9 @@ func matmulDispatch(out []float32, w []byte, wtype uint32, x []float32, rows, co
 		}
 		MatMulF32(out, f32, x, rows, cols)
 	case ggmlTypeQ4_K:
-		MatMulQ4_K(out, w, x, rows, cols)
+		AccelMatMulQ4K(out, w, x, rows, cols)
 	case ggmlTypeQ6_K:
-		MatMulQ6_K(out, w, x, rows, cols)
+		AccelMatMulQ6K(out, w, x, rows, cols)
 	default:
 		fmt.Printf("[tongue/model] WARNING: unsupported matmul type %d for %dx%d\n", wtype, rows, cols)
 	}

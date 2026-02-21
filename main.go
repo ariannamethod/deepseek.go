@@ -61,6 +61,7 @@ func main() {
 		model.Reset()
 
 		// Prefill
+		prefillStart := time.Now()
 		pos := 0
 		for _, tok := range tokens {
 			model.Forward(tok, pos)
@@ -69,11 +70,16 @@ func main() {
 				break
 			}
 		}
+		prefillDur := time.Since(prefillStart)
+		prefillToks := len(tokens)
+		fmt.Printf("[deepseek] prefill: %d tokens in %.2fs (%.1f tok/s)\n", prefillToks, prefillDur.Seconds(), float64(prefillToks)/prefillDur.Seconds())
 
 		// Generate
 		repWindow := 64
 		recentTokens := make([]int, 0, repWindow)
 		repPenalty := float32(1.15)
+		decodeStart := time.Now()
+		genTokens := 0
 
 		for i := 0; i < *maxTokens; i++ {
 			logits := model.State.Logits
@@ -110,11 +116,16 @@ func main() {
 
 			model.Forward(next, pos)
 			pos++
+			genTokens++
 			if pos >= model.Config.SeqLen {
 				break
 			}
 		}
-		fmt.Println()
+		decodeDur := time.Since(decodeStart)
+		fmt.Printf("\n[deepseek] decode: %d tokens in %.2fs (%.1f tok/s)\n", genTokens, decodeDur.Seconds(), float64(genTokens)/decodeDur.Seconds())
+		totalDur := prefillDur + decodeDur
+		totalToks := prefillToks + genTokens
+		fmt.Printf("[deepseek] total: %d tokens in %.2fs (%.1f tok/s)\n", totalToks, totalDur.Seconds(), float64(totalToks)/totalDur.Seconds())
 	}
 
 	if *prompt != "" {
