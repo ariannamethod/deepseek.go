@@ -1,0 +1,4 @@
+deepseek
+*.so
+*.dylib
+*.o
